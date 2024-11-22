@@ -19,8 +19,10 @@ namespace py = pybind11;
 #include <float.h>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
 #include <Eigen/Dense>
+#include <pybind11/eigen.h>
 
 /*#include "mex.h"
 #include "mexlib.h"*/
@@ -58,6 +60,36 @@ void * test_calloc(  int n, int sz) ;
 function [alphas,alognorm,betas,blognorm,gammaN,gamm,Ahat] = 
     alphabetacompress(Lin,S,hparm,ksegment,<Ahat>);
 */
+
+struct HMMParams {
+    unsigned int n_states;
+    Eigen::VectorXd pi;
+    Eigen::MatrixXd A;
+    Eigen::VectorXi state_to_class_index;
+    Eigen::VectorXi pdf_to_class_index;
+    Eigen::VectorXd pdf_entry;
+    Eigen::VectorXi k_segments;
+    Eigen::VectorXd beta_end;
+    Eigen::MatrixXd partition_distrib;
+
+    HMMParams(unsigned int n_states_){
+        if(n_states_ == 0){
+            std::throw_with_nested(std::invalid_argument("Number of states cannot be equal to 0."));
+        }
+        n_states = n_states_;
+    }
+
+    // Define setters and getters
+    void setPi(Eigen::Ref<Eigen::VectorXd> pi_){
+        // Check that pi is N-dimensional
+        if(pi_.size() != n_states){
+            std::throw_with_nested(std::invalid_argument("Pi should have " + std::to_string(n_states) +
+            " states/dimensions but was " + std::to_string(pi_.size())));
+        }
+        pi = pi_;
+    }
+};
+
 void alphabetacompress(const double *L_IN, const double *S_IN, const double *hparm_IN, const double *Ahat_IN,
                        double *alphas_OUT, double *alognorm_OUT, double *betas_OUT,
                        double * blognorm_OUT, double * gammaN_out, double *gamma_OUT, double *Ahat_out){
@@ -692,4 +724,7 @@ double alphabetacompress_wrapper(py::array_t<double> L_in,
 PYBIND11_MODULE(mrhmm, m) {
     m.doc() = "This is a binding and rewriting of alphabetacompress in C++ for numpy";
     m.def("alpha_beta_compress", &alphabetacompress_wrapper, "Computes forward path of multi resolution HMM");
+    py::class_<HMMParams>(m, "HMMParams")
+            .def(py::init<int>())
+            .def("setPi", &HMMParams::setPi);
 }
