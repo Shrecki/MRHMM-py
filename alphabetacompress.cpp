@@ -642,7 +642,11 @@ void pmbError(char * msg) {
     std::throw_with_nested(std::runtime_error(msg));
     //mexPrintf("%s\n",msg);
     //mexErrMsgTxt(msg);
-} 
+}
+
+void passHMMParams(HMMParams &params){
+    std::cout << "n_states: " <<  params.n_states << std::endl;
+}
 
 void * test_calloc(  int n, int sz) {
    void * ptr;
@@ -724,6 +728,7 @@ double alphabetacompress_wrapper(py::array_t<double> L_in,
 PYBIND11_MODULE(mrhmm, m) {
     m.doc() = "This is a binding and rewriting of alphabetacompress in C++ for numpy";
     m.def("alpha_beta_compress", &alphabetacompress_wrapper, "Computes forward path of multi resolution HMM");
+    m.def("hmm_print_states", &passHMMParams, "Prints number of states in input HMMParams object");
     py::class_<HMMParams>(m, "HMMParams")
             .def(py::init<int>())
             .def("setPi", &HMMParams::setPi);
