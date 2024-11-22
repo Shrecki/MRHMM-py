@@ -9,6 +9,7 @@ this_dir = pathlib.Path(__file__).parent.resolve()
 
 # Path to the local pybind11 headers
 pybind11_include = str(this_dir / 'extern' / 'pybind11' / 'include')
+eigen_include = str(this_dir / 'extern' / 'eigen')
 
 def get_cpp_flag():
     if sys.platform == 'win32':
@@ -18,10 +19,11 @@ def get_cpp_flag():
 
 ext_modules = [
     Extension(
-        'example',  # Name of the module
-        ['example.cpp'],
+        'mrhmm',  # Name of the module
+        ['alphabetacompress.cpp'],
         include_dirs=[
             pybind11_include,
+            eigen_include
         ],
         language='c++',
         extra_compile_args=[get_cpp_flag()],
@@ -29,10 +31,10 @@ ext_modules = [
 ]
 
 setup(
-    name='example',
+    name='mrhmm',
     version='0.0.1',
-    author='Your Name',
-    description='A Python package with a C++ extension (using pybind11)',
+    author='Fabrice Guibert',
+    description='A Python package with a C++ extension (using pybind11 and Eigen)',
     ext_modules=ext_modules,
     cmdclass={'build_ext': build_ext},
     zip_safe=False,

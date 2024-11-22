@@ -20,6 +20,8 @@ namespace py = pybind11;
 #include <stdexcept>
 #include <string>
 
+#include <Eigen/Dense>
+
 /*#include "mex.h"
 #include "mexlib.h"*/
 
