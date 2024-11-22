@@ -9,6 +9,7 @@ Subsequent Revisions:
         Nov.22 2024 by Fabrice Guibert
 ----------------------------------------------------*/
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 
 namespace py = pybind11;
 
@@ -17,23 +18,23 @@ namespace py = pybind11;
 #include <math.h>
 #include <float.h>
 
-#include "mex.h"
-#include "mexlib.h"
+/*#include "mex.h"
+#include "mexlib.h"*/
 
 /* Input Arguments */
-#define    L_IN prhs[0]
+/*#define    L_IN prhs[0]
 #define    S_IN prhs[1]
 #define    hparm_IN prhs[2]
-#define    Ahat_IN prhs[3]
+#define    Ahat_IN prhs[3]*/
 
 /* Output Arguments */
-#define    alphas_OUT    plhs[0]
+/*#define    alphas_OUT    plhs[0]
 #define    alognorm_OUT    plhs[1]
 #define    betas_OUT    plhs[2]
 #define    blognorm_OUT    plhs[3]
 #define    gammaN_OUT    plhs[4]
 #define    gamma_OUT    plhs[5]
-#define    Ahat_OUT    plhs[6]
+#define    Ahat_OUT    plhs[6]*/
 
 
 #define MAXN 100
@@ -53,8 +54,14 @@ void * test_calloc(  int n, int sz) ;
 function [alphas,alognorm,betas,blognorm,gammaN,gamm,Ahat] = 
     alphabetacompress(Lin,S,hparm,ksegment,<Ahat>);
 */
+void alphabetacompress(double *L_IN, double *S_IN, double *hparm_IN, double *Ahat_IN,
+                       double *alphas_OUT, double *alognorm_OUT, double *betas_OUT,
+                       double * blognorm_OUT, double * gammaN_out, double *gamma_OUT, double *Ahat_out){
+
+/*}
+
 void mexFunction( int  nlhs, MATRIX *plhs[], int  nrhs, const MATRIX *prhs[])
-{
+{*/
 
     double   *Lin, *S, ltmp, ltmp2, *lmax, penalties[MAXN][MAXPARTITION];
     double   psisum2, penalties2[MAXN][MAXPARTITION];
@@ -66,8 +73,8 @@ void mexFunction( int  nlhs, MATRIX *plhs[], int  nrhs, const MATRIX *prhs[])
     int first_wait[MAXN][MAXPARTITION];
     int partition_ptr_A[MAXN][MAXPARTITION];
     int do_train,do_A,last_wait[MAXN][MAXPARTITION];
-    mxArray *hparm;
-    mxArray *parm;
+    double *hparm; // was mxArray
+    double *parm; // was mxArray
     double *ksegment,*bout,*aout, *tmp, *state_to_class_index, *pdf_to_class_index;
     double *alphas, *betas, *alognorm, *blognorm, max_l,max1,max2, *Pi, *A, *gamma, *gammaN, *Ahat_in, *Ahat_out;
     double psisum,ptmp,*psi,gammasum,*partition_distrib, *beta_end;
