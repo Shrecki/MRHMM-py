@@ -21,7 +21,7 @@ namespace py = pybind11;
 #include <string>
 #include <iostream>
 
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 #include <pybind11/eigen.h>
 
 /*#include "mex.h"
