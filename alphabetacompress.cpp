@@ -731,5 +731,6 @@ PYBIND11_MODULE(mrhmm, m) {
     m.def("hmm_print_states", &passHMMParams, "Prints number of states in input HMMParams object");
     py::class_<HMMParams>(m, "HMMParams")
             .def(py::init<int>())
-            .def("setPi", &HMMParams::setPi);
+            .def("setPi", &HMMParams::setPi)
+            .def_readonly("n_states", &HMMParams::n_states);
 }
