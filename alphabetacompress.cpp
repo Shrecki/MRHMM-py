@@ -6,8 +6,11 @@ Author: Dr. Paul M. Baggenstoss,
         401-832-8240
 Date:   Nov. 18, 1999
 Subsequent Revisions:
+        Nov.22 2024 by Fabrice Guibert
 ----------------------------------------------------*/
+#include <pybind11/pybind11.h>
 
+namespace py = pybind11;
 
 #include <stdlib.h>
 #include <stdio.h>
