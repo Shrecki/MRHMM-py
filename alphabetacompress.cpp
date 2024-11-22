@@ -59,6 +59,27 @@ function [alphas,alognorm,betas,blognorm,gammaN,gamm,Ahat] =
 void alphabetacompress(const double *L_IN, const double *S_IN, const double *hparm_IN, const double *Ahat_IN,
                        double *alphas_OUT, double *alognorm_OUT, double *betas_OUT,
                        double * blognorm_OUT, double * gammaN_out, double *gamma_OUT, double *Ahat_out){
+    /**
+     * @param: L_in input log-likelihoods, of dimension nseg x npdf, where nseg is total number of base segments in
+     *         input timeseries and npdf is number of pdfs (one pdf for each combination of signal class and segment
+     *         length). These are partial PDF values, as they are normalized by number of base segments in processing window.
+     * @param: S matrix of indices defining which column of Lin to look for a given combination of state and partition.
+     *         In effect S[istate,ipartition] = index.
+     *         @todo: replace 1-indexing with 0-indexing
+     *         Note that not all states have the same number of partitions. Invalid partitions are marked with -1
+     *         @todo: replace 0 for invalid with -1 instead
+     * @param: hparm MR-HMM parameter structure with fields:
+     *         N: number of states
+     *         Pi: N-dimensional vector of initial state probabilities
+     *         A: NxN state transition matrix
+     *         state_to_class_index: N-dimensional vector indicates signal corresponding to each state
+     *         pdf_to_class_index: Npdf-dimensional vector
+     *         pdf_entry: Npdf-dimensional vector
+     *         ksegment: Npdf vector indicating number of base segments for corresponding pdf
+     *         beta_end: Nstate x 1 vector, should be all ones.
+     *         PartitionDistrib: maxnpartition x N matrix, defines probability that given partition will be chosen
+     *                           conditioned on state
+     */
 
 /*}
 
@@ -601,31 +622,27 @@ void * test_calloc(  int n, int sz) {
 }
 
 
-int alphabetacompress_wrapper(py::array_t<double> L_in,
+double alphabetacompress_wrapper(py::array_t<double> L_in,
                                     py::array_t<double> S_in,
                                     py::array_t<double> hparm_in,
                                     py::array_t<double>Ahat_in){
     // Request buffers
-    auto buf_L_in = L_in.request();
+    auto buf_L_in = L_in.request(); // L_in is a MATRIX of dimensionality nseg x Npdf
     auto buf_S_in = S_in.request();
 
-    return 3;
-
-    /*
     auto buf_hparm_in = hparm_in.request();
     auto buf_Ahat_in = Ahat_in.request();
 
+    /*
     if (L_in.ndim() != 1 || S_in.ndim() != 1) {
         throw std::runtime_error("Input arrays must be one-dimensional");
     }
 
     if (L_in.size() != S_in.size()) {
         throw std::runtime_error("Input arrays must have the same size");
-    }
+    }*/
 
     size_t n = L_in.size();
-
-
 
     // Pointers to input data
     const double* ptr_L_in = static_cast<const double*>(buf_L_in.ptr);
@@ -637,14 +654,19 @@ int alphabetacompress_wrapper(py::array_t<double> L_in,
     // Allocate output arrays
     py::array_t<double> out_alphas(n);
     py::array_t<double> out_alog(n);
+    py::array_t<double> out_betas(n);
+    py::array_t<double> out_blognorm(n);
+    py::array_t<double> out_gammaN(n);
+    py::array_t<double> out_gamma(n);
+    py::array_t<double> out_Ahat(n);
 
     auto buf_out_alphas = out_alphas.request();
     auto buf_out_alog = out_alog.request();
-    auto buf_out_betas = out_alog.request();
-    auto buf_out_blognorm = out_alog.request();
-    auto buf_out_gammaN = out_alog.request();
-    auto buf_out_gamma = out_alog.request();
-    auto buf_out_Ahat = out_alog.request();
+    auto buf_out_betas = out_betas.request();
+    auto buf_out_blognorm = out_blognorm.request();
+    auto buf_out_gammaN = out_gammaN.request();
+    auto buf_out_gamma = out_gamma.request();
+    auto buf_out_Ahat = out_Ahat.request();
 
     // Pointers to output data
     double* ptr_out_alphas = static_cast<double*>(buf_out_alphas.ptr);
@@ -655,8 +677,12 @@ int alphabetacompress_wrapper(py::array_t<double> L_in,
     double* ptr_out_gamma = static_cast<double*>(buf_out_gamma.ptr);
     double* ptr_out_Ahat = static_cast<double*>(buf_out_Ahat.ptr);
 
-    alphabetacompress(ptr_L_in, ptr_S_in, ptr_hparm_in, ptr_Ahat_in,ptr_out_alphas,ptr_out_alog,ptr_out_betas, ptr_out_blognorm, ptr_out_gammaN, ptr_out_gamma, ptr_out_Ahat);
-     */
+    alphabetacompress(ptr_L_in, ptr_S_in, ptr_hparm_in, ptr_Ahat_in,
+                      ptr_out_alphas,ptr_out_alog,ptr_out_betas,
+                      ptr_out_blognorm, ptr_out_gammaN, ptr_out_gamma,
+                      ptr_out_Ahat);
+
+    return ptr_L_in[100];
 }
 
 
