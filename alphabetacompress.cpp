@@ -56,7 +56,7 @@ void * test_calloc(  int n, int sz) ;
 function [alphas,alognorm,betas,blognorm,gammaN,gamm,Ahat] = 
     alphabetacompress(Lin,S,hparm,ksegment,<Ahat>);
 */
-void alphabetacompress(double *L_IN, double *S_IN, double *hparm_IN, double *Ahat_IN,
+void alphabetacompress(const double *L_IN, const double *S_IN, const double *hparm_IN, const double *Ahat_IN,
                        double *alphas_OUT, double *alognorm_OUT, double *betas_OUT,
                        double * blognorm_OUT, double * gammaN_out, double *gamma_OUT, double *Ahat_out){
 
@@ -78,7 +78,7 @@ void mexFunction( int  nlhs, MATRIX *plhs[], int  nrhs, const MATRIX *prhs[])
     double *hparm; // was mxArray
     double *parm; // was mxArray
     double *ksegment,*bout,*aout, *tmp, *state_to_class_index, *pdf_to_class_index;
-    double *alphas, *betas, *alognorm, *blognorm, max_l,max1,max2, *Pi, *A, *gamma, *gammaN, *Ahat_in, *Ahat_out;
+    //double *alphas, *betas, *alognorm, *blognorm, max_l,max1,max2, *Pi, *A, *gamma, *gammaN, *Ahat_in, *Ahat_out;
     double psisum,ptmp,*psi,gammasum,*partition_distrib, *beta_end;
 
 //
@@ -598,4 +598,70 @@ void * test_calloc(  int n, int sz) {
           //mexErrMsgTxt("out");
    }
    return ( ptr);
+}
+
+
+int alphabetacompress_wrapper(py::array_t<double> L_in,
+                                    py::array_t<double> S_in,
+                                    py::array_t<double> hparm_in,
+                                    py::array_t<double>Ahat_in){
+    // Request buffers
+    auto buf_L_in = L_in.request();
+    auto buf_S_in = S_in.request();
+
+    return 3;
+
+    /*
+    auto buf_hparm_in = hparm_in.request();
+    auto buf_Ahat_in = Ahat_in.request();
+
+    if (L_in.ndim() != 1 || S_in.ndim() != 1) {
+        throw std::runtime_error("Input arrays must be one-dimensional");
+    }
+
+    if (L_in.size() != S_in.size()) {
+        throw std::runtime_error("Input arrays must have the same size");
+    }
+
+    size_t n = L_in.size();
+
+
+
+    // Pointers to input data
+    const double* ptr_L_in = static_cast<const double*>(buf_L_in.ptr);
+    const double* ptr_S_in = static_cast<const double*>(buf_S_in.ptr);
+    const double* ptr_hparm_in = static_cast<const double*>(buf_hparm_in.ptr);
+    const double* ptr_Ahat_in = static_cast<const double*>(buf_Ahat_in.ptr);
+
+
+    // Allocate output arrays
+    py::array_t<double> out_alphas(n);
+    py::array_t<double> out_alog(n);
+
+    auto buf_out_alphas = out_alphas.request();
+    auto buf_out_alog = out_alog.request();
+    auto buf_out_betas = out_alog.request();
+    auto buf_out_blognorm = out_alog.request();
+    auto buf_out_gammaN = out_alog.request();
+    auto buf_out_gamma = out_alog.request();
+    auto buf_out_Ahat = out_alog.request();
+
+    // Pointers to output data
+    double* ptr_out_alphas = static_cast<double*>(buf_out_alphas.ptr);
+    double* ptr_out_alog = static_cast<double*>(buf_out_alog.ptr);
+    double* ptr_out_betas = static_cast<double*>(buf_out_betas.ptr);
+    double* ptr_out_blognorm = static_cast<double*>(buf_out_blognorm.ptr);
+    double* ptr_out_gammaN = static_cast<double*>(buf_out_gammaN.ptr);
+    double* ptr_out_gamma = static_cast<double*>(buf_out_gamma.ptr);
+    double* ptr_out_Ahat = static_cast<double*>(buf_out_Ahat.ptr);
+
+    alphabetacompress(ptr_L_in, ptr_S_in, ptr_hparm_in, ptr_Ahat_in,ptr_out_alphas,ptr_out_alog,ptr_out_betas, ptr_out_blognorm, ptr_out_gammaN, ptr_out_gamma, ptr_out_Ahat);
+     */
+}
+
+
+
+PYBIND11_MODULE(mrhmm, m) {
+    m.doc() = "This is a binding and rewriting of alphabetacompress in C++ for numpy";
+    m.def("alpha_beta_compress", &alphabetacompress_wrapper, "Computes forward path of multi resolution HMM");
 }
