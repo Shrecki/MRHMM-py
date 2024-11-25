@@ -8,6 +8,19 @@ Date:   Nov. 18, 1999
 Subsequent Revisions:
         Nov.22 2024 by Fabrice Guibert
 ----------------------------------------------------*/
+/*
+ * @todo: finish hmmParams object
+ * @todo: change signature of alphabetacompress to use hmmParams instead of an array
+ * @todo: update all fields and calls to hmmParams in alphabetacompress
+ * @todo: add dimensionality controls
+ * @todo: replace mex calls with proper C++ calls
+ * @todo: replace matrices with Eigen matrices
+ * @todo: be careful with indices (whether starts at 0 or 1)
+ * @todo: break alphabetacompress into smaller functions to unit test properly
+ * @todo: do not forget to free arrays, even in cases of exceptions and runtime errors.
+ * @todo: documentation
+ */
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -90,7 +103,7 @@ struct HMMParams {
     }
 };
 
-void alphabetacompress(const double *L_IN, const double *S_IN, const double *hparm_IN, const double *Ahat_IN,
+void alphabetacompress(const double *L_IN, const double *S_IN, const HMMParams &hparm_IN, const double *Ahat_IN,
                        double *alphas_OUT, double *alognorm_OUT, double *betas_OUT,
                        double * blognorm_OUT, double * gammaN_out, double *gamma_OUT, double *Ahat_out){
     /**
@@ -662,13 +675,14 @@ void * test_calloc(  int n, int sz) {
 
 double alphabetacompress_wrapper(py::array_t<double> L_in,
                                     py::array_t<double> S_in,
-                                    py::array_t<double> hparm_in,
+                                    HMMParams & hparm_in,
                                     py::array_t<double>Ahat_in){
     // Request buffers
+    std::cout << "Number of states in hmmParams:" << hparm_in.n_states << std::endl;
     auto buf_L_in = L_in.request(); // L_in is a MATRIX of dimensionality nseg x Npdf
     auto buf_S_in = S_in.request();
 
-    auto buf_hparm_in = hparm_in.request();
+    //auto buf_hparm_in = hparm_in.request();
     auto buf_Ahat_in = Ahat_in.request();
 
     /*
@@ -685,7 +699,7 @@ double alphabetacompress_wrapper(py::array_t<double> L_in,
     // Pointers to input data
     const double* ptr_L_in = static_cast<const double*>(buf_L_in.ptr);
     const double* ptr_S_in = static_cast<const double*>(buf_S_in.ptr);
-    const double* ptr_hparm_in = static_cast<const double*>(buf_hparm_in.ptr);
+    //const double* ptr_hparm_in = static_cast<const double*>(buf_hparm_in.ptr);
     const double* ptr_Ahat_in = static_cast<const double*>(buf_Ahat_in.ptr);
 
 
@@ -715,7 +729,7 @@ double alphabetacompress_wrapper(py::array_t<double> L_in,
     double* ptr_out_gamma = static_cast<double*>(buf_out_gamma.ptr);
     double* ptr_out_Ahat = static_cast<double*>(buf_out_Ahat.ptr);
 
-    alphabetacompress(ptr_L_in, ptr_S_in, ptr_hparm_in, ptr_Ahat_in,
+    alphabetacompress(ptr_L_in, ptr_S_in, hparm_in, ptr_Ahat_in,
                       ptr_out_alphas,ptr_out_alog,ptr_out_betas,
                       ptr_out_blognorm, ptr_out_gammaN, ptr_out_gamma,
                       ptr_out_Ahat);
